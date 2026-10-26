@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AlgoTrace
 
-## Getting Started
+AlgoTrace is a static site for watching a JavaScript solution run, one step at a time. Open a problem, pick a test case, and the page highlights the current line while arrays, hash maps, strings, and plain values update beside the code.
 
-First, run the development server:
+The live app is [algotrace-ac31a.web.app](https://algotrace-ac31a.web.app/).
+
+There is no backend, database, or account. Every problem, solution, and test case is a file in this repository. Next.js builds those files into static HTML, and Firebase Hosting serves the result.
+
+## What you can practice
+
+The home page has two groups.
+
+**NeetCode 150.** Numbered problems such as Contains Duplicate, Two Sum, and Group Anagrams. The counter shows how many of the 150 are in the repo so far.
+
+**Extras I.** Interview-style problems reported for [Agoda](https://codejeet.com/company/agoda) and [Grab](https://codejeet.com/company/grab). These cards have no practice number. Each one is tagged with the company that asks it, the original LeetCode problem, and the algorithm family (hash table, stack, binary search, and so on). A few of those LeetCode statements are premium, so the extra here is the standard public version of that algorithm.
+
+Search works by title, company, algorithm, or LeetCode number. Typing `Agoda`, `Grab`, or `739` filters the list.
+
+## What a problem page does
+
+1. The page shows the description, your JavaScript solution, and the test cases.
+2. Choosing a test case runs that solution in the browser. A Babel tracer records the variables after each statement, with a 500-step guard so a loop cannot run forever.
+3. Playback steps through that recording. Arrow keys move one step, and Space plays or pauses.
+4. Arrays show index pointers, objects show as key-value buckets, and the last step checks the return value against the expected output.
+
+## Run it locally
+
+This project uses pnpm.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3010](http://localhost:3010). Port 3010 is fixed in the `dev` script so it does not collide with another app on port 3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`pnpm build` writes the static site to `out/`. `pnpm lint` runs ESLint.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Add a problem
 
-## Learn More
+Create one file per problem. Name it with the slug, for example `src/data/problems/two-sum.ts`, and export the problem as the default. Then import that file from `src/data/problems/index.ts` and add it to the `PROBLEMS` array.
 
-To learn more about Next.js, take a look at the following resources:
+A numbered NeetCode entry sets `number`. An extra leaves `number` off, sets `category` to `Extras I`, and can set `companies`, `leetcode`, and `algorithms`. `code` is the JavaScript function the tracer will run. `functionName` must match that function. `testCases` supplies the arguments and the expected return value. `trackedVariables` are the names drawn on the stage, and `pointerVariables` are indexes such as `i` or `left`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The route is `/problems/<slug>/`. After the file is registered, the next production build includes that page.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy
 
-## Deploy on Vercel
+Hosting is the Firebase project `algotrace-ac31a`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm run deploy
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+That builds `out/` and publishes it with `firebase deploy --only hosting`. The public URL is [https://algotrace-ac31a.web.app](https://algotrace-ac31a.web.app/).
